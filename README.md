@@ -13,12 +13,23 @@ In this simple example I just choose windows by 1000 point samples from input au
 * scipy: to load wav file
 * pyaudio: to stream wav file on the output channel
 
-#### forward looking:
+#### looking forward:
 here I must try python *PIL* and *pyqt* to investigation of showing speed.
+
+
+
+***
+<p style="direction:rtl;text-align:right"> <h3> طیف نگار صوتی </h3> </p>
+
+**[طیف نگار][1]**
+نمایش محتوای فرکانسی یک سیگنال صوتی یا به طور کلی هر سیگنال در زمان‌های مختلف است. برای این منظور به طور معمول از 
+[تبدیل فوریه زمان کوتاه][3]
+استفاده می‌شود.
+روش کار به این صورت است که فایل صوتی به تکه‌های کوچک شامل ۱۰۰۰ نمونه تقسیم می‌شود. سپس در هر پنجره به طور مجزا تبدیل فوریه استخراج می‌شود.
+برای محاسبه تبدیل فوریه، در هر پنجره نمونه برداری با نرخ ۰/۱ فقط برای کاهش زمان محاسبه انجام می‌شود. 
+ 
+
 
 [1]: https://en.wikipedia.org/wiki/Spectrogram
 [2]: https://en.wikipedia.org/wiki/Fast_Fourier_transform
-
-***
-
-<p style="dir=rtl;text-align=right"> <h3> طیف نگار صوتی </h3></p>
+[3]: https://fa.wikipedia.org/wiki/%D8%AA%D8%A8%D8%AF%DB%8C%D9%84_%D9%81%D9%88%D8%B1%DB%8C%D9%87_%D8%B2%D9%85%D8%A7%D9%86_%DA%A9%D9%88%D8%AA%D8%A7%D9%87
