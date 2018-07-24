@@ -8,15 +8,25 @@ to calculate *Spectrogram* you need separate audio into some local windows, and 
 In this simple example I just choose windows by 1000 point samples from input audio, and resampling into 100 point to decreasing calculation time. 
 
 #### requirements for this version:
-* opencv2: since *cv2.imshow* is fast I use this module
+* python curses ( I think this is a default madule!)
+* ~~opencv2: since *cv2.imshow* is fast I use this module~~
 * numpy:  to create image of spectogram and calculation of *fft*
-* scipy: to load wav file
+* scipy.io: to load wav file
+* scipy.signal to do some filters
 * pyaudio: to stream wav file on the output channel
 
 #### looking forward:
-here I must try python *PIL* and *pyqt* to investigation of showing speed.
+here I must try ~~python *PIL* and~~ *pyQt* to investigation of showing speed.
 
-
+#### keyboard usage:
+* press 0~9 key to costumize the equalizer
+* E to toggle equalizer filter
+* v to remove voice by dividing left and right channel
+* p and o for pitch shifting
+* s to time stretching
+* r to revese the sound!
+* left/right arrow to move forward and backward
+* up/down arrow keys to change volume
 
 ***
 <p style="direction:rtl;text-align:right"> <h3> طیف نگار صوتی </h3> </p>
