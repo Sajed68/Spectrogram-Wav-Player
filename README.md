@@ -9,7 +9,7 @@ In this simple example I just choose windows by 1000 point samples from input au
 
 #### requirements for this version:
 * opencv2: since *cv2.imshow* is fast I use this module
-* nmupy:  to create image of spectogram and calculation of *fft*
+* numpy:  to create image of spectogram and calculation of *fft*
 * scipy: to load wav file
 * pyaudio: to stream wav file on the output channel
 
