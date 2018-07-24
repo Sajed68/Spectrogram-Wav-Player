@@ -1,292 +1,294 @@
-#!/usr/bin/python
+#1/user/bin/python
 
 
+import curses
+from curses import KEY_RIGHT, KEY_LEFT, KEY_UP, KEY_DOWN
 import argparse
-import numpy as np
-import cv2
 import pyaudio
 from scipy.io import wavfile
+import numpy as np
+from scipy.signal import resample_poly, filtfilt, butter, freqz_zpk, freqz
 
 
 
-parser = argparse.ArgumentParser(description='Wav Player by spectrogram')
-parser.add_argument('Name', metavar='Name', type=str, nargs='+', help='input file name by wav extension')
+parser = argparse.ArgumentParser(description='Flare Player || ver. 1.0')
+parser.add_argument('Name', metavar='Name', type=str, nargs='+', help='File name by wave extension')
 
 args = parser.parse_args()
-print(args.Name[0])
+
 FILE_NAME = args.Name[0]
+print(FILE_NAME)
 
-COLORS = [(127, 255, 255),
- (122, 255, 255),
- (118, 255, 255),
- (113, 255, 255),
- (109, 255, 255),
- (104, 255, 255),
- (100, 255, 255),
- (95, 255, 255),
- (91, 255, 255),
- (86, 255, 255),
- (82, 255, 255),
- (77, 255, 255),
- (72, 255, 255),
- (68, 255, 255),
- (63, 255, 255),
- (59, 255, 255),
- (54, 255, 255),
- (50, 255, 255),
- (45, 255, 255),
- (41, 255, 255),
- (36, 255, 255),
- (32, 255, 255),
- (27, 255, 255),
- (22, 255, 255),
- (18, 255, 255),
- (13, 255, 255),
- (9, 255, 255),
- (4, 255, 255),
- (0, 255, 255),
- (0, 255, 255),
- (0, 255, 255),
- (0, 255, 255),
- (0, 254, 255),
- (0, 250, 255),
- (0, 246, 255),
- (0, 242, 255),
- (0, 238, 255),
- (0, 234, 255),
- (0, 230, 255),
- (0, 226, 255),
- (0, 222, 255),
- (0, 218, 255),
- (0, 214, 255),
- (0, 210, 255),
- (0, 206, 255),
- (0, 202, 255),
- (0, 198, 255),
- (0, 194, 255),
- (0, 190, 255),
- (0, 186, 255),
- (0, 182, 255),
- (0, 178, 255),
- (0, 174, 255),
- (0, 170, 255),
- (0, 166, 255),
- (0, 162, 255),
- (0, 158, 255),
- (0, 154, 255),
- (0, 150, 255),
- (0, 146, 255),
- (0, 142, 255),
- (0, 138, 255),
- (0, 134, 255),
- (0, 130, 255),
- (0, 126, 255),
- (0, 122, 255),
- (0, 118, 255),
- (0, 114, 255),
- (0, 110, 255),
- (0, 106, 255),
- (0, 102, 255),
- (0, 98, 255),
- (0, 94, 255),
- (0, 90, 255),
- (0, 86, 255),
- (0, 82, 255),
- (0, 78, 255),
- (0, 74, 255),
- (0, 70, 255),
- (0, 66, 255),
- (0, 62, 255),
- (0, 58, 255),
- (0, 54, 255),
- (0, 50, 255),
- (0, 46, 255),
- (0, 42, 255),
- (0, 38, 255),
- (0, 34, 255),
- (4, 30, 255),
- (7, 26, 255),
- (10, 22, 252),
- (13, 18, 249),
- (17, 14, 246),
- (20, 10, 242),
- (23, 6, 239),
- (26, 2, 236),
- (30, 0, 233),
- (33, 0, 230),
- (36, 0, 226),
- (39, 0, 223),
- (42, 0, 220)]
+# ########################### Fucntion: # ##########################
+def makeI(c, width, pos=1):
+	N = c.shape[0]
+	I = [0]*N
+	idx = int(N*pos / width)
+	chars = ['#'] * N
+	for i in range(N):
+		value = np.floor(c[i]*N).astype(np.int)
+		I[i] = value
+		if i <= idx:
+			chars[i] = '#'
+		else:
+			chars[i] = '@'
+	return I, chars
 
-COLORS = [(0, 0, 127),
- (0, 0, 132),
- (0, 0, 136),
- (0, 0, 141),
- (0, 0, 145),
- (0, 0, 150),
- (0, 0, 154),
- (0, 0, 159),
- (0, 0, 163),
- (0, 0, 168),
- (0, 0, 172),
- (0, 0, 177),
- (0, 0, 182),
- (0, 0, 186),
- (0, 0, 191),
- (0, 0, 195),
- (0, 0, 200),
- (0, 0, 204),
- (0, 0, 209),
- (0, 0, 213),
- (0, 0, 218),
- (0, 0, 222),
- (0, 0, 227),
- (0, 0, 232),
- (0, 0, 236),
- (0, 0, 241),
- (0, 0, 245),
- (0, 0, 250),
- (0, 0, 254),
- (0, 0, 255),
- (0, 0, 255),
- (0, 0, 255),
- (0, 0, 255),
- (0, 4, 255),
- (0, 8, 255),
- (0, 12, 255),
- (0, 16, 255),
- (0, 20, 255),
- (0, 24, 255),
- (0, 28, 255),
- (0, 32, 255),
- (0, 36, 255),
- (0, 40, 255),
- (0, 44, 255),
- (0, 48, 255),
- (0, 52, 255),
- (0, 56, 255),
- (0, 60, 255),
- (0, 64, 255),
- (0, 68, 255),
- (0, 72, 255),
- (0, 76, 255),
- (0, 80, 255),
- (0, 84, 255),
- (0, 88, 255),
- (0, 92, 255),
- (0, 96, 255),
- (0, 100, 255),
- (0, 104, 255),
- (0, 108, 255),
- (0, 112, 255),
- (0, 116, 255),
- (0, 120, 255),
- (0, 124, 255),
- (0, 128, 255),
- (0, 132, 255),
- (0, 136, 255),
- (0, 140, 255),
- (0, 144, 255),
- (0, 148, 255),
- (0, 152, 255),
- (0, 156, 255),
- (0, 160, 255),
- (0, 164, 255),
- (0, 168, 255),
- (0, 172, 255),
- (0, 176, 255),
- (0, 180, 255),
- (0, 184, 255),
- (0, 188, 255),
- (0, 192, 255),
- (0, 196, 255),
- (0, 200, 255),
- (0, 204, 255),
- (0, 208, 255),
- (0, 212, 255),
- (0, 216, 255),
- (0, 220, 254),
- (0, 224, 250),
- (0, 228, 247),
- (2, 232, 244),
- (5, 236, 241),
- (8, 240, 237),
- (12, 244, 234),
- (15, 248, 231),
- (18, 252, 228),
- (21, 255, 225),
- (24, 255, 221),
- (28, 255, 218),
- (31, 255, 215),
- (34, 255, 212)]
 
-def makeI(c):
-         I = np.zeros((200, 500, 3), np.uint8)
-         b = I.shape[0]//100
-         a = I.shape[1]//c.shape[0]
-         for i in range(c.shape[0]):
-                 v = np.floor(c[i]*100).astype(np.int)
-                 j = v
-                 I[0:(j+1)*b, i*a:(i+1)*a, :] = COLORS[100 - v]
-                 #for j in range(v):
-                 #if v < 33:
-                     #I[0:(j+1)*b, i*a:(i+1)*a, :] = (100, 255, 10)
-                 #elif v < 66:
-                     #I[0:(j+1)*b, i*a:(i+1)*a, :] = (255, 100, 10)
-                 #else:
-                     #I[0:(j+1)*b, i*a:(i+1)*a, :] = (10, 100, 255)
-         I = np.flipud(I)
-         return I
+# ########time:
+def return_time(i, fs=None, s=1000):
+	if fs is not None:
+		t = i*s  /fs
+	else:
+		t = i
+	h = int(t // 3600)
+	if h > 0:
+		m = int((t - h*3600)//60)
+		text = str(h) + ':' + str(m) + ':' + str((t - h*3600 - m*60))[0:2]
+	else:
+		m = int(t // 60)
+		text = str(m) + ':' + str((t - m*60))[0:4]
+	return text
+
+
+# #### upsampleing
+def speedx(sound_array, factor):
+	""" Multiplies the sound's speed by some `factor` """
+	indices = np.round( np.arange(0, len(sound_array), factor) )
+	indices = indices[indices < len(sound_array)].astype(int)
+	return sound_array[ indices.astype(int),: ]
 
 
 
-def nothing(x):
-    pass
 
 
-def return_time(i, fs, s=1000):
-     t = i*s  /fs
-     h = int(t // 3600)
-     if h > 0:
-         m = int((t - h*3600)//60)
-         text = str(h) + ':' + str(m) + ':' + str((t - h*3600 - m*60))
-     else:
-         m = int(t // 60)
-         text = str(m) + ':' + str((t - m*60))[0:5]
-     return text
 
 
-fs , w = wavfile.read(FILE_NAME)
 
+## init the TUI: ######
+curses.initscr()
+win = curses.newwin(30, 50,0,0)
+win.keypad(True)
+curses.noecho()
+curses.cbreak()
+curses.curs_set(0)
+curses.start_color()
+
+win.border(0)
+win.nodelay(True)
+win.addstr(0, 2, '.::Now Playing: ' + FILE_NAME + '::. ')
+
+key = 0
+
+
+
+
+###############init player:
+fs, w = wavfile.read(FILE_NAME)
 p = pyaudio.PyAudio()
-
 stream = p.open(format=pyaudio.paInt16, channels=2, rate=fs, frames_per_buffer=100, output=True)
 
 
-
-cv2.namedWindow(FILE_NAME)
-cv2.createTrackbar('', FILE_NAME, 0, w.shape[0]//1000, nothing)
 i = 0
-M = w.max() *1000**0.5
-#for i in range(int(w.shape[0]/1000)+1):
-c = 0
-while i < w.shape[0]/1000:
-     b = w[1000*i:1000*(i+1), :]
-     stream.write(b.tostring())
-     b = b.sum(1)/2
-     c = np.abs(np.fft.fft(b[0:-1:10]/1)) + M * c * 0.95
-     mc = c.max()
-     M = mc if M < mc else M
-     c = c / M
-     m = c.shape[0]
-     i = cv2.getTrackbarPos('', FILE_NAME)
-     i+=1
-     cv2.setTrackbarPos('', FILE_NAME, i)
-     #time.sleep(0.001)
-     if i % 4 == 0:
-         I = makeI(c[0:m//2]).astype(np.uint8)
-         cv2.putText(I, return_time(i, fs), (10, 50), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (255,255,255), 2, cv2.LINE_AA)
-         cv2.imshow(FILE_NAME, I)
-         cv2.waitKey(1)
-         #c = 0
-cv2.destroyAllWindows()
+M = w.shape[0] * w.max() * 50 / ((w.sum(1)/2)**2).sum()**0.5 / 2**0.5
+
+pause = False
+
+MONO = False if w.shape[-1] == 2 else True
+TIME = w.shape[0]/fs
+
+mag = 0
+
+width = w.shape[0] / 1000
+B, A = butter(5, 0.5, btype='low', analog=False)
+
+vol = 100
+pitch_shift = 0
+time_stretch = False
+voice = True
+reverse = False
+EQ = False
+Equalizer = np.array([20, 18, 16, 14, 12, 10, 12, 14, 16, 18], np.int)
+Eqbins = np.linspace(0, np.pi, 12)[1:-1]
+
+reverba = np.array([-1.9, 0, 1])
+reverbb = np.array([1    , 0, -1.9])
+
+#reverbb = np.array([1,   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -0.2])
+_,reverbator = freqz(reverba, reverbb, 1000, whole=True)
+reverbator = reverbator / np.abs(reverbator).max()
+reverbator = np.vstack((reverbator, reverbator)).T
+reverb = False
+
+#### MAIN LOOP: ###############
+
+while key != 27 and i < width - 1:
+	win.border(0)
+	win.addstr(0, 2, '.::Now Playing: ' + FILE_NAME + '::.')
+	win.timeout(0)
+	
+##############################
+
+	if not pause:
+		if reverse:
+			frame = (w[::-1,:][1000*i:1000*(i+1),:].astype(np.double) * vol / 100)
+		else:
+			frame = (w[1000*i:1000*(i+1),:].astype(np.double) * vol / 100)
+
+		#### processors:
+		# voice reduction:
+		if not voice and not MONO:
+			frame[::,0] = frame[::,0] - frame[::,1]
+			frame[::,1] = frame[::,0]
+		# pitch shiftting and time stretching
+		if pitch_shift != 0:
+			Frame = np.fft.rfft(frame, 1000, axis=0)
+			ps = 1000 + pitch_shift
+			if ps < 1000:
+				Frame = resample_poly(Frame, ps, 1000, window=('kaiser', 1))
+			else:
+				Frame = speedx(Frame, 1000/ps)
+			#Frame[np.abs(Frame) < abs(Frame).max()/50] = 0
+			play = np.fft.irfft(Frame, ps, axis=0).real
+			if time_stretch is False:
+				if ps < 2000:
+					play = resample_poly(play, 1000, ps, window=('kaiser', 1))
+				else:
+					play = speedx(play, ps/1000)
+		
+			play = 0.01*play - 0.99* filtfilt(B, A, play, axis=0)
+            
+			play = play
+		else:
+			play = frame
+
+		if EQ:
+			Frame = np.fft.rfft(play)
+			#E = np.array([Equalizer[0]]*100+[Equalizer[1]]*100+[Equalizer[2]]*100+[Equalizer[3]]*100+[Equalizer[4]]*100+[Equalizer[5]]*100+[Equalizer[6]]*100+[Equalizer[7]]*100+[Equalizer[8]]*100+[Equalizer[9]]*100)
+			#E = freqz(1, Equalizer, Frame.shape[0]//2)[1]
+			E = freqz_zpk((20 - Equalizer)*np.exp(1j*Eqbins), Equalizer*np.exp(1j*Eqbins), 1 , Frame.shape[0]//2)[1]
+			E = E / E.max()
+			E = np.hstack((E, E[::-1]))
+			E = np.vstack((E,E)).T
+			Frame *= np.abs(E)
+			play = np.fft.irfft(Frame).real
+        
+		if reverb:
+			Frame = np.fft.fft(play)
+			Frame = Frame*reverbator
+			play = np.fft.ifft(Frame).real
+
+			#play = filtfilt(reverbb, reverba, play, axis=0)/(3.5*10**25)
+
+		###############
+
+		stream.write(play.astype(np.int16).tostring())
+		i += 1
+	else:
+		win.addstr(10, 10, 'Paused.')
+		frame = np.zeros((1000,2))
+
+	frame = frame.sum(1)/2 * 100 / vol
+	mag = 0.1 * np.abs(np.fft.fft(frame[0:-1:20]))/M + mag * (0.9)
+	mag[mag > 1] = 1
+
+	spec, ind = makeI(mag[0:25], width, i)
+
+
+
+	
+	key = win.getch()
+	if key == ord(' '):
+		pause = not pause
+	elif key == KEY_LEFT and i > 100:
+		i -= 100
+	elif key == KEY_RIGHT and i <= width:
+		i += 100
+	elif key == KEY_UP and vol < 100:
+		vol += 1
+	elif key == KEY_DOWN and vol > 1:
+		vol -= 1
+	elif key == ord('p') and pitch_shift < 800:
+		pitch_shift += 10
+	elif key == ord('o') and pitch_shift > -800:
+		pitch_shift -= 10
+	elif key == ord('s'):
+		time_stretch = not time_stretch
+	elif key == ord('r'):
+		reverse = not reverse
+	elif key == ord('v'):
+		voice = not voice
+	## EQ: ''' """"""""""""""""""""""" '''
+	elif key == ord('e'):
+		EQ = not EQ
+	# increase :
+	elif key == ord('1') and Equalizer[0] < 20:
+		Equalizer[0] += 1
+	elif key == ord('2') and Equalizer[1] < 20:
+		Equalizer[1] += 1
+	elif key == ord('3') and Equalizer[2] < 20:
+		Equalizer[2] += 1
+	elif key == ord('4') and Equalizer[3] < 20:
+		Equalizer[3] += 1
+	elif key == ord('5') and Equalizer[4] < 20:
+		Equalizer[4] += 1
+	elif key == ord('6') and Equalizer[5] < 20:
+		Equalizer[5] += 1
+	elif key == ord('7') and Equalizer[6] < 20:
+		Equalizer[6] += 1
+	elif key == ord('8') and Equalizer[7] < 20:
+		Equalizer[7] += 1
+	elif key == ord('9') and Equalizer[8] < 20:
+		Equalizer[8] += 1
+	elif key == ord('0') and Equalizer[9] < 20:
+		Equalizer[9] += 1
+	# decrease :
+	elif key == ord('!') and Equalizer[0] > 0:
+		Equalizer[0] -= 1
+	elif key == ord('@') and Equalizer[1] > 0:
+		Equalizer[1] -= 1
+	elif key == ord('#') and Equalizer[2] > 0:
+		Equalizer[2] -= 1
+	elif key == ord('$') and Equalizer[3] > 0:
+		Equalizer[3] -= 1
+	elif key == ord('%') and Equalizer[4] > 0:
+		Equalizer[4] -= 1
+	elif key == ord('^') and Equalizer[5] > 0:
+		Equalizer[5] -= 1
+	elif key == ord('&') and Equalizer[6] > 0:
+		Equalizer[6] -= 1
+	elif key == ord('*') and Equalizer[7] > 0:
+		Equalizer[7] -= 1
+	elif key == ord('(') and Equalizer[8] > 0:
+		Equalizer[8] -= 1
+	elif key == ord(')') and Equalizer[9] > 0:
+		Equalizer[9] -= 1
+    ########
+	elif key == ord('z'):
+		reverb = not reverb
+	else:
+		pass
+    
+
+
+	for line in range(1, 26):
+		win.addstr(line, 1, ' '*48)
+	
+	curses.curs_set(0)
+	for line in range(1,26):
+		win.addstr(line,1, ind[line-1]*spec[line-1]*2)
+	
+	k = int(34*i/width)
+	win.addstr(26, 8, '='*k+' '*(34-k))
+	win.addstr(26, 43,  return_time(TIME - i*1000/fs)[0:7])
+	win.addstr(26, 1,  return_time(i, fs)[0:7])
+	win.addstr(27, 1, '|vol:' + str(vol) + '|pitch shift:'+str(pitch_shift)+'|time stretching:'+str(time_stretch)+'|')
+	win.addstr(28, 1, '|voice:' + str(voice) + '|reverse:'+str(reverse)+'|' + ' '*18 + '|')
+	win.addstr(29, 1, '|'+''.join(str(k)[0:3] + '|' for k in Equalizer)+'|EQ:'+str(EQ)[0]+'|')
+	
+	win.refresh()
+
+win.erase()
+win.clear()
+win.refresh()
+curses.endwin()
