@@ -45,8 +45,9 @@ here I must try ~~python *PIL* and~~ *pyQt* to investigation of showing speed.
 [3]: https://fa.wikipedia.org/wiki/%D8%AA%D8%A8%D8%AF%DB%8C%D9%84_%D9%81%D9%88%D8%B1%DB%8C%D9%87_%D8%B2%D9%85%D8%A7%D9%86_%DA%A9%D9%88%D8%AA%D8%A7%D9%87
 
 
+----------------------------------------------------------------------
 
-## this is a help documentatation of **Flare Player**. 
+## this is a help documentatation of *Player**. 
 ______________________________________________________________________
 
 usage: python3 cur.py filename.wav.
@@ -97,7 +98,8 @@ Here to implement both pitch shifting and time stretching systems, I used the nu
 To change the pitch, I do another **resampling** but in **time domain** and return back the sammple number to 1000. The following graph show the structure:
 
 
-> [Time Domain] ====>  [Frequency Domain] : (Resampling) ====> [Time Domain] : Time Stretching ====> [Time Domain] : (Resampling) : Pitch Shifting
+> [Time Domain] ====>  [Frequency Domain] : (Resampling) ====> [Time Domain] : Time Stretching ====> [Time Domain] : (Resampling) : Pitch Shifting  
+
 you can see the code under pitch shifting section for better undderstanding.
 
 #### Flanging effect:
@@ -109,20 +111,20 @@ Flanging effect is kind of delay. But the delay amount changes over a period. th
 #### reverbation:
 When a sound plays in a room, there are many direct or indirect passible way, that hearer can recieve the sound. direct way is the original sound that comes through the air right into hearer ears. But, sound propagates omnidirectional, so in some direction it goes to the walls and reflected into hearer. The reflected sound spend longgest way than direct sound, so this is hears some amounts of time after the direct one. If we call sound source as "S" and hearer as "h", then following graph show some ways that hearer can hear a sound.
 
->-----------------------  
->|          /\         |  
->|         /  \        |  
->|         h---S       |  
->|          \  /       |  
->|           \/        |  
->-----------------------
+> -----------------------  
+> |          /\         |  
+> |         /  \        |  
+> |         h---S       |  
+> |          \  /       |  
+> |           \/        |  
+> -----------------------
 
 Remeber, due to sound propagation speed, the delay may be under 0.3 miliseconds, and attenuation of reflection is considerable, so we can't experience this in usual room we have, but in bathrooms we can try!
 In commercial softwares or even hardwares, there are many implementation of reverb effect by many parameters, such as size of room, number of walls and etc. Here is use a very simple allpass transfer function to filter sound signal by reverb filter (generaly to search over internet try reverb convolution) like this:
 
 >                        -D  
 >              -a  +    z  
-> Rev-F[z] = ----------------  
+> Rev-F[z] = \----------------  
 >                        -D  
 >               1  -  a z  
 
