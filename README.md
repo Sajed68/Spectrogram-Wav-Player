@@ -47,8 +47,8 @@ here I must try ~~python *PIL* and~~ *pyQt* to investigation of showing speed.
 
 ----------------------------------------------------------------------
 
-## this is a help documentatation of *Player**. 
-______________________________________________________________________
+## this is a help documentatation of **Player**. 
+---------------------------------------------------------------------
 
 usage: python3 cur.py filename.wav.
 requirements are python-curses, pyauio, scipy and numpy.
@@ -105,28 +105,28 @@ you can see the code under pitch shifting section for better undderstanding.
 #### Flanging effect:
 Flanging effect is kind of delay. But the delay amount changes over a period. the priodic signal can be sinusiod or triagle function, let call that **M[n]**, then Flanging effect derived by this equation:
 
-> M[n] = D/2 * (1 - cos(2 * &pi; * F_flange * n))
+> M[n] = D/2 * (1 - cos(2 * &pi; * F_flange * n))  
 > X_Flanging[n] = X[n] + g * X[M[n]]
 
 #### reverbation:
 When a sound plays in a room, there are many direct or indirect passible way, that hearer can recieve the sound. direct way is the original sound that comes through the air right into hearer ears. But, sound propagates omnidirectional, so in some direction it goes to the walls and reflected into hearer. The reflected sound spend longgest way than direct sound, so this is hears some amounts of time after the direct one. If we call sound source as "S" and hearer as "h", then following graph show some ways that hearer can hear a sound.
 
-> -----------------------  
-> |          /\         |  
-> |         /  \        |  
-> |         h---S       |  
-> |          \  /       |  
-> |           \/        |  
-> -----------------------
+ \-----------------------  
+ \|          /\         |  
+ \|         /  \        |  
+ \|         h---S       |  
+ \|          \  /       |  
+ \|           \/        |  
+ \-----------------------
 
 Remeber, due to sound propagation speed, the delay may be under 0.3 miliseconds, and attenuation of reflection is considerable, so we can't experience this in usual room we have, but in bathrooms we can try!
 In commercial softwares or even hardwares, there are many implementation of reverb effect by many parameters, such as size of room, number of walls and etc. Here is use a very simple allpass transfer function to filter sound signal by reverb filter (generaly to search over internet try reverb convolution) like this:
 
->                        -D  
->              -a  +    z  
-> Rev-F[z] = \----------------  
->                        -D  
->               1  -  a z  
+                        -D  
+              -a  +    z  
+ Rev-F[z] = \----------------  
+                        -D  
+               1  -  a z  
 
 #### Repeat:
 very simple, I just add delayed signal to original signal. this delay amount is fixed over time. 
