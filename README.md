@@ -10,8 +10,8 @@ In this simple example I just choose windows by 1000 point samples from input au
 #### requirements for this version:
 * python curses ( I think this is a default madule!)
 * ~~opencv2: since *cv2.imshow* is fast I use this module~~
-* numpy:  to create image of spectogram and calculation of *fft*
-* * scipy.io: to load wav file
+* ~~numpy:  to create image of spectogram and calculation of *fft*~~
+* scipy.io: to load wav file
 * scipy.signal to do some filters
 * pyaudio: to stream wav file on the output channel
 
@@ -48,18 +48,20 @@ here I must try ~~python *PIL* and~~ *pyQt* to investigation of showing speed.
 
 ##this is a help documentatation of **Flare Player**. 
 ______________________________________________________________________
-usage: python[3] cur.py filename.wav.
+
+usage: python3 cur.py filename.wav.
 requirements are python-curses, pyauio, scipy and numpy.
 **curses** manages the player window on the commandline 
 environment.
 **scipy.io.wavfile** loads the **.wav** files as numpy array, so
- there is no support for other audio formats [yet]. 
+ there is no support for other audio formats \[yet]. 
 **numpy** module calculate the FFT of loaded audio. STFT was driven
 by non-overlap windowing signal and performing the FFT on each window.
 the length of each window sets on 1000 samples, so it means each window
 has a duration equals to 1000/fs seconds.
+
 -----------------------------------------------------------------------
-###[Controls on audio effets]:
+### \[Controls on audio effets]:
 * up/down keys:  : increase or decrease audio volume.
 * left/right keys: step back/forwward by 100/fs seconds.
 * r:             : reverse the audio and play it from end to begin!
@@ -80,7 +82,8 @@ has a duration equals to 1000/fs seconds.
 * Space:         : Pause/resume 
 
 ------------------------------------------------------------------------
-###[Technical issues]:
+
+### [Technical issues]:
 #### reversing the audio:
 Imagine the digital audio as an array like this: [1, 2, 3, 4 ,5]. Normally, playing reads the array from left to right. in revese mode, it read from right to left. it seem useless, don't is?  
 
