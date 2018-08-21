@@ -10,7 +10,7 @@ In this simple example I just choose windows by 1000 point samples from input au
 #### requirements for this version:
 * python curses ( I think this is a default madule!)
 * ~~opencv2: since *cv2.imshow* is fast I use this module~~
-* ~~numpy:  to create image of spectogram and calculation of *fft*~~
+* numpy:  to ~~create image of spectogram and~~ calculation of *fft*
 * scipy.io: to load wav file
 * scipy.signal to do some filters
 * pyaudio: to stream wav file on the output channel
@@ -86,13 +86,13 @@ has a duration equals to 1000/fs seconds.
 
 ### [Technical issues]:
 #### reversing the audio:
-Imagine the digital audio as an array like this: \[1, 2, 3, 4 ,5]. Normally, playing reads the array from left to right. in revese mode, it read from right to left. it seem useless, don't is?  
+Imagine the digital audio as an array like this: \[1, 2, 3, 4 ,5]. Normally, player reads the array from left to right. in revese mode, it read from right to left. it seem useless, don't is?  
 
 #### voice removal:
 This is not very perfect. Some of **stereo audios** are recording by **voice cenered** mode, then by subtracting the left and right channels, it is possible to remove (in practice reduce) voice by a little degradation as drawback. Nowadays voice removal is an open topic in both of commercial and academic research.  
 
 #### changing pitch and time stretching:  
-Pitch shifting and time stretching are two similar topics. Simple expression, if you digitally **recorded** a sound by sample rate **fs** for example 4000 Hz and **play** it by  **different sample rate**, it causes that playing time changes. in the example if we play the signal by 5000 Hz sample rate, the time was compressed. because, originally it plays 4000 samples in one second of time. But, the second player by 5000 Hz sample rate, plays 5000 samples in one second. so 4000 samples are lower than on second. this works for lower sample rate, too. time stretching is not the only effect when you change the player sample rate. it also changes the sound pitch. But, what is **pitch**? they call it fundemental frequency. when you say a vovel non-stoply on one breath, for example <i> and you say iiiiiiiiiiiiiiiiiiiiiiiii, Technically, your voice is a peridioc signal. this period is a fundemental for <i> in your vocal organs. changing the sample rate not only changes the time duration, but also it changes the pitches. Maybe you seen before on the movies, when the time goes slowly, the pepole sounds turn to lower start of human hearing frequency, Bass. Anf When it goes fast, the sound goes to treble ie. higher end of human hearing.
+Pitch shifting and time stretching are two similar topics. Simple expression, if you digitally **recorded** a sound by sample rate **fs** for example 4000 Hz and **play** it by  **different sample rate**, it causes that playing time changes. in the example if we play the signal by 5000 Hz sample rate, the time was compressed. because, originally it plays 4000 samples in one second of time. But, the second player by 5000 Hz sample rate, plays 5000 samples in one second. so 4000 samples are lower than on second. this works for lower sample rate, too. time stretching is not the only effect when you change the player sample rate. it also changes the sound pitch. But, what is **pitch**? they call it fundemental frequency. when you say a vovel non-stoply on one breath, for example "i" and you say iiiiiiiiiiiiiiiiiiiiiiiii, Technically, your voice is a peridioc signal. this period is a fundemental for "i" in your vocal organs. changing the sample rate not only changes the time duration, but also it changes the pitches. Maybe you seen before on the movies, when the time goes slowly, the pepole sounds turn to lower start of human hearing frequency, Bass. Anf When it goes fast, the sound goes to treble ie. higher end of human hearing.
 Don't forget to read wikipeida for pitch and time stretching.
 Here to implement both pitch shifting and time stretching systems, I used the numpy.fft on the following structure: each **frame** has a 1000 samples that sampled by **fs**. So, the fourier transform on frame, **Frame**, normally has 1000 samples too. then I do a **resampling** in **frequency domain** and calculate the inverse fourier transform, by new sample number. This means I change the **playing sample rate** aka **time stretching/compressing**, without causing effect on the signal pitch; [if you want to change them together try to change configuration of your player, in my case I use **pyaudio** and audio streamer has a sample rate in its settings].
 To change the pitch, I do another **resampling** but in **time domain** and return back the sammple number to 1000. The following graph show the structure:
