@@ -3,7 +3,7 @@ Simple Spectrogram based on wav player
 
 ### Spectogram Wav Player:
 this is very simple audio player that supports only **wav** formats, that can show [**Spectogram**][1] simultaneusly.
-the structure is quite simple, **scipy** packages can handle *wav* file by *scipy.io.wavfile*. 
+the procedure is quite simple, **scipy** packages can handle *wav* file by *scipy.io.wavfile*. 
 to calculate *Spectrogram* you need separate audio into some local windows, and then, in each window just calculate [**FFT**][2] by module **numpy.fft.fft**.
 In this simple example I just choose windows by 1000 point samples from input audio, and resampling into 100 point to decreasing calculation time. 
 
@@ -86,7 +86,7 @@ has a duration equals to 1000/fs seconds.
 
 ### [Technical issues]:
 #### reversing the audio:
-Imagine the digital audio as an array like this: \[1, 2, 3, 4 ,5]. Normally, player reads the array from left to right. in revese mode, it read from right to left. it seem useless, don't is?  
+Imagine the digital audio as an array like this: \[1, 2, 3, 4 ,5]. Normally, player reads the array from left to right. in revese mode, it read from right to left. it seems useless, doesn't it?  
 
 #### voice removal:
 This is not very perfect. Some of **stereo audios** are recording by **voice cenered** mode, then by subtracting the left and right channels, it is possible to remove (in practice reduce) voice by a little degradation as drawback. Nowadays voice removal is an open topic in both of commercial and academic research.  
